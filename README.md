@@ -10,7 +10,7 @@ I wrote a simple and smart scritp using: BeautifulSoup, requests, openpyxl, date
 Hope you liked it!
 
 ### The scripts:
-I create 2 python scripts.
+I created 2 python scripts:
 1) **Import_Shabat_Data_Table** [Link here](https://github.com/Danielevko/Shift_Calculator/blob/master/Import_Shabat_Data_Table.ipynb)
 
 The first one is used to import all the data from the website: "https://calendar.2net.co.il/parasha.aspx".
