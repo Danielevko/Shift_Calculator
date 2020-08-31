@@ -12,10 +12,12 @@ Hope you liked it!
 ### The scripts:
 I create 2 python scripts.
 1) **Import_Shabat_Data_Table** [Link here](https://github.com/Danielevko/Shift_Calculator/blob/master/Import_Shabat_Data_Table.ipynb)
+
 The first one is used to import all the data from the website: "https://calendar.2net.co.il/parasha.aspx".
 I import the data using BeautifulSoup and requests modules.
 
 2) **shift_calculator_script** [Link here](https://github.com/Danielevko/Shift_Calculator/blob/master/shift_calculator_script.ipynb)
+
 The second and the main script is doing several things:
 first its to import the excel file that contains the shifts data of the current month, 
 and then caluclate the salary according to the "shabat list" we created in the first script.
