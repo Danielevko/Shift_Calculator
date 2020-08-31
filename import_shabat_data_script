@@ -1,0 +1,95 @@
+import requests
+from bs4 import BeautifulSoup
+import datetime
+
+
+def isEnglish(s):
+    try:
+        s.encode(encoding='utf-8').decode('ascii')
+    except UnicodeDecodeError:
+        return False
+    else:
+        return True
+
+def fix_date2(shabat):
+    y = []
+    counter = 0
+    for i in shabat:
+        l1 = [str(y) for y in i[2].split('-')]
+        y.append(l1)
+        if len(y[counter][0]) > 2:
+            day_special, month_special = (int(j) for j in y[counter][0].split('/'))
+            day2, month, year = (int(j) for j in y[counter][1].split('/'))
+            born1 = datetime.date(year, month, day2)
+            born2 = datetime.date(year, month_special, day_special)
+            shabat[counter][2] = [born1]
+            shabat[counter][2].append(born2)
+            counter += 1
+        else:
+            day1 = int(l1[0])
+            day2, month, year = (int(j) for j in y[counter][1].split('/'))
+            born1 = datetime.date(year, month, day1)
+            born2 = datetime.date(year, month, day2)
+            shabat[counter][2] = [born1]
+            shabat[counter][2].append(born2)
+            counter += 1
+
+    shabat = list(filter(lambda x: x[2][0].year != 2019 and x[2][1].year != 2019, shabat))
+    return shabat
+
+def fix_time(shabat):
+    counter=0
+    for i in shabat:
+        start_hour=datetime.timedelta(hours=int(i[1][0:2]),minutes=int(i[1][3:5]))
+        finish_hour=datetime.timedelta(hours=int(i[0][0:2]),minutes=int(i[0][3:5]))
+        shabat[counter][0]=start_hour
+        shabat[counter][1]=finish_hour
+        counter+=1
+    return shabat
+
+def clean_the_data(x):
+    temp2 = []
+    shabat=[]
+    for i in x:
+        try:
+            x.remove('')
+        except:
+            break
+
+    for i in x:
+        temp = i
+        for j in i:
+            if not (j.isdigit() or j == ':' or j == '/' or j == '-') or (not isEnglish(j)):
+                temp = temp.replace(j, '')
+        temp2.append(temp)
+
+    for i in range(1, len(temp2) - 1):
+        counter = 1
+        for j in range(len(temp2[i])):
+            temp += temp2[i][-counter]
+            counter += 1
+            if counter == 6:
+                shabat.append([temp[::-1]])
+                temp = ''
+            if counter == 11:
+                shabat[i - 1].append(temp[::-1])
+                temp = ''
+                temp2[i] = temp2[i].replace(shabat[i - 1][1] + shabat[i - 1][0], '')
+                shabat[i - 1].append(temp2[i])
+                break
+
+    return shabat
+
+url="https://calendar.2net.co.il/parasha.aspx"
+print(f"extracting data from website: \" {url} \" \n ")
+page = requests.get(url)
+soup = BeautifulSoup(page.content, 'html.parser')
+
+content=soup.find(id="content_mainTable")
+shabat=content.get_text()
+
+shabat=shabat.splitlines()
+
+shabat=clean_the_data(shabat)
+shabat=fix_date2(shabat)
+shabat=fix_time(shabat)
