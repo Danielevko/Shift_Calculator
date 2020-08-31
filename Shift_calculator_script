@@ -1,0 +1,202 @@
+from openpyxl import load_workbook
+from shabat_holiday import *
+from prettytable import PrettyTable
+from tkinter import Tk
+from tkinter.filedialog import askopenfile
+
+def arrange_data_into_list(dataset):
+    counter=0
+    temp=[]
+    d=[]
+    for i in dataset:
+        if counter==0:
+            temp.append(datetime.timedelta(hours=int(i[0:2]),minutes=int(i[3:5])))
+        if counter==1:
+            temp.append(datetime.timedelta(hours=int(i[0:2]),minutes=int(i[3:5])))
+        if counter==2:
+            temp.append(i)
+        if counter==3:
+            temp.append(findDay(i))
+            temp.append(transfer_date_to_datetime(i))
+            temp.append(calculate_work_time(temp[1],temp[0]))
+            d.append(temp)
+        counter+=1
+        if counter==4:
+            counter=0
+            temp=[]
+
+    return d
+
+def get_excel_values(sheet,dataset):
+    max_row = sheet.max_row
+    # get max column count
+    max_column = sheet.max_column
+    for i in range(1, max_row + 1):
+
+        # iterate over all columns
+        for j in range(1, max_column + 1):
+            # get particular cell value
+            cell_obj = sheet.cell(row=i, column=j)
+            # print cell value
+            dataset.append(cell_obj.value)
+    return dataset
+
+def transfer_date_to_datetime(date):
+    day,month,year=(int(j) for j in date.split('/'))
+    born=datetime.date(year,month,day)
+    return born
+
+def findDay(date):
+    day, month, year = (int(i) for i in date.split('/'))
+    born = datetime.date(year, month, day)
+    return born.strftime("%A")
+
+def remove_none_values(dataset):
+    d=[]
+    for i in dataset:
+            if i != None:
+                d.append(i)
+    ##DELETING THE HEADERS
+    del d[0:11]
+    return d
+
+def calculate_work_time(entrance,exit):
+    temp=exit-entrance
+    if temp < datetime.timedelta(days=0):
+        temp += datetime.timedelta(days=1)
+    temp= round(temp.total_seconds()/60/60,2)
+
+    return temp
+
+def import_shabat_data(shabat,y):
+    for i in shabat:
+        for j in i[2]:
+            if j==y:
+                return i
+    raise ValueError("shabat date not found")
+
+def print_shifts(dataset):
+    t=PrettyTable(['Date','Day','Entrance', 'Exit','Total Time', 'Site name'])
+    print(f"Your Shifts in {dataset[0][4].strftime('%B')} were:")
+    for i in dataset:
+        t.add_row([i[4],i[3],i[1],i[0],i[-1],i[2]])
+    print(t)
+
+def shift_calculator(shabat, entrance, exit, date, day_name, worktime):
+    global extra_time_counter
+    global shabat_counter
+    temp=0
+    if day_name == 'Friday':
+        x = import_shabat_data(shabat, date)
+        if exit >= x[0]:
+            if worktime>8:
+                ##FRIDAY HALF SHABAT MORE THEN 8 HOURS
+                shabat_counter+=1
+                extra_hours=exit-datetime.timedelta(hours=8)
+                extra_time_counter+=extra_hours.total_seconds()/60/60
+                transfer=((datetime.timedelta(hours=8)+extra_hours*1.25)-x[0])*1.5
+                temp+=round(transfer.total_seconds() / 60 / 60,2)
+                transfer=x[0]-entrance
+                temp+=round(transfer.total_seconds() / 60 / 60, 2)
+            else:
+                ##FRIDAY HALF SHABAT LESS THEN 8 HOURS
+                shabat_counter+=1
+                transfer = (exit - x[0]) * 1.5
+                temp += round(transfer.total_seconds() / 60 / 60, 2)
+                transfer = x[0] - entrance
+                temp += round(transfer.total_seconds() / 60 / 60, 2)
+        elif entrance >= x[0]:
+            if worktime>8:
+                ##FRIDAY SHABAT AND MORE THEN 8 HOURS
+                shabat_counter += 1
+                extra_hours=worktime-8
+                extra_time_counter += extra_hours
+                temp+=(extra_hours*1.25+8)*1.5
+            else:
+                ##FRIDAY SHABAT AND LESS THEN 8 HOURS
+                shabat_counter += 1
+                temp += worktime * 1.5
+        else:
+            if worktime> 8:
+                extra_hours=worktime-8
+                extra_time_counter += extra_hours
+                temp+=extra_hours*1.25+8
+            else:
+                temp += worktime
+
+    elif day_name == 'Saturday':
+        x = import_shabat_data(shabat, date)
+        if x[1] >= entrance:
+            if worktime>8:
+                ##HALF SHABAT AND MORE THEN 8 HOURS
+                shabat_counter += 1
+                extra_hours=exit-datetime.timedelta(hours=8)
+                extra_time_counter += extra_hours.total_seconds() / 60 / 60
+                transfer=(x[1]-entrance)*1.5
+                temp+=round(transfer.total_seconds() / 60 / 60, 2)
+                transfer=(extra_hours*1.25+datetime.timedelta(hours=8))-x[1]
+                temp += round(transfer.total_seconds() / 60 / 60, 2)
+            else:
+                ##HALF SHABAT AND LESS THEN 8 HOURS
+                shabat_counter += 1
+                transfer = (x[1] - entrance) * 1.5
+                temp += round(transfer.total_seconds() / 60 / 60, 2)
+                transfer = exit - x[1]
+                temp += round(transfer.total_seconds() / 60 / 60, 2)
+        elif exit <= x[1]:
+            ##IN SHABAT AND MORE THEN 8 HOURS
+
+            if worktime>8:
+                shabat_counter += 1
+                extra_hours=worktime-8
+                extra_time_counter += extra_hours
+                temp+=(extra_hours*1.25+8)*1.5
+            else:
+                ##IN SHABAT AND LESS THEN 8 HOURS
+                shabat_counter += 1
+                temp += worktime * 1.5
+        else:
+            ##AFTER SHABAT AND MORE THEN 8 HOURS
+            if worktime>8:
+                extra_hours = worktime - 8
+                extra_time_counter += extra_hours
+                temp+=extra_hours*1.25+ 8
+            else:
+                ##AFTER SHABAT AND LESS THEN 8 HPURS
+                temp += worktime
+    else:
+        ##REGULAR DAY AND MORE THEN 8 HOURS
+        if worktime>8:
+            extra_hours=worktime-8
+            extra_time_counter += extra_hours
+            temp+=extra_hours*1.25+8
+        else:
+            ##REGULAR DAY AND LESS THEN 8 HOURS
+            temp+=worktime
+    return temp
+
+Tk().withdraw()
+filenametk=askopenfile(mode='r',title="Please choose Excel file",filetypes =[('Excel Files', '*.xlsx')])
+workbook = load_workbook(filename=filenametk.name)
+
+sheet = workbook.active
+dataset=[]
+
+shabat_counter=0
+extra_time_counter=0
+
+dataset=get_excel_values(sheet,dataset)
+dataset=remove_none_values(dataset)
+dataset=arrange_data_into_list(dataset)
+print_shifts(dataset)
+
+total_hours=0
+for i in dataset:
+    total_hours+=shift_calculator(shabat, i[1], i[0], i[4], i[3], i[-1])
+
+
+wage= int(input(f"What is your wage per Hour?" ))
+print(f"you made this month {round(total_hours*wage,2)} shekels")
+print(f"{len(dataset)} Shifts, {shabat_counter} were on 150% ")
+print(f"Your total hours: {round(sum([x[-1] for x in dataset],2))}, in extra hours: {round(extra_time_counter, 2)}")
+print('Great Job!')
