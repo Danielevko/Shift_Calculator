@@ -16,10 +16,5 @@ I import the data using BeautifulSoup and requests modules.
 
 2) **shift_calculator_script** [Link here](https://github.com/Danielevko/Shift_Calculator/blob/master/shift_calculator_script.ipynb)
 
-The second and the main script is doing several things:
-first its to import the excel file that contains the shifts data of the current month, 
-and then caluclate the salary according to the "shabat list" we created in the first script.
-the code check every shift (an excel cell) from the excel file, if the shift was done in friday or saturday its comparing the shift date with the "shabat list", 
-after the dates are match, we can extract the exact entry and exit times according to the website, 
-and then calculate the time our wage needs to be increased by 150%.
-that way our salary is more accurate then most salary software, that accountants are still using today.
+The second and main script is doing several things: 
+First of all, it imports the Excel file that contains the shifts data of the current month. Secondly, it calculates the salary according to the ‘Sabbath list’ we created in the first script. The code checks every shift (which is represented by a single Excel cell) from the Excel file. If the shift was done on Friday or Saturday, it compares the shift date with the ‘Sabbath list’. In case the dates match, we can extract the exact entry and exit times according to the website, and then calculate the time our wage goes up to Sabbath rate, which is 150%. That way our salary is calculated more accurately than most salary software that accountants are still using today.
