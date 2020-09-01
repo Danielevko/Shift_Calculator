@@ -1,13 +1,11 @@
 # Shift_Calculator
 
 ### Intro:
-For the past year i'm working in shifts, each month i try to recalculate my salary that depends on the number of shifts I worked that month, 
-and the more important factor is the time i worked in "shabat time". 
-"shabat time" means that from a specific time in friday my hourly wage increase in 150%, and in specific time in saturday my wage is back to regular,
-and its important to mention every week the "shabat" entry and exit times are changing. 
-I was wasting a lot of time each month to calculate my inncome till i decided i can build a Python code that will do that for me.
-I wrote a simple and smart scritp using: BeautifulSoup, requests, openpyxl, datetime, tkinter, prettytable, and pyinstaller modules.
-Hope you liked it!
+For the past year I’ve been working in shifts. Every month I found myself trying to calculate my upcoming salary depending on the number of shifts I did, while taking in account regular shifts (Sunday to Thursday) and weekend shifts (Friday to Saturday).
+The crucial factor of this calculating program was the weekend shifts, called “Sabbath Time”, that differ in their rate and given salary, while the concept is pretty easy to catch. From the commencement of the Sabbath, the salary rate goes up to 150% its’ normal hourly wage, and when the Sabbath ends it goes back to its’ normal rate. 
+The main struggle was to constantly check the specific times of when the Sabbath starts and when it ends, in order to calculate the exact anticipated salary.
+I used to waist a lot of times trying to calculate my income by myself, until I realized I can build my own Python program that will do that for me.
+Hence, I wrote a smart and simple script using numerous Python libraries:  BeautifulSoup, requests, openpyxl, datetime, tkinter, prettytable, and pyinstaller modules. Hope you like it!
 
 ### The scripts:
 I created 2 python scripts:
